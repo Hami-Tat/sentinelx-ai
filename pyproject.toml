@@ -1,0 +1,5 @@
+[project]
+name = "sentinelx-ai"
+version = "0.1.0"
+description = "Intelligent Cyber Defense Platform"
+requires-python = ">=3.12"
