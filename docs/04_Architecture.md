@@ -1,324 +1,491 @@
 # SentinelX AI
-## Software Architecture
+# Architecture de Référence v1.0
 
+**Document :** 04_Architecture_v1.md
 
+**Projet :** SentinelX AI – Intelligent Cyber Defense Platform
 
-# 1. Introduction
+**Version :** 1.0
 
-SentinelX AI follows a modular, scalable and maintainable architecture based on the principles of:
+**Statut :** Architecture officielle
 
-- Clean Architecture
-- Domain-Driven Design (DDD)
-- Event-Driven Architecture
-- SOLID Principles
+**Auteur :** Équipe SentinelX AI
 
-The architecture separates business logic from infrastructure to facilitate testing, maintenance, scalability and future evolution.
+---
 
+# 1. Vision
 
+SentinelX AI est une plateforme intelligente de cyberdéfense capable de surveiller un réseau en temps réel, détecter des cyberattaques connues et inconnues grâce au Machine Learning, évaluer le niveau de risque, prendre des décisions automatiques et proposer des mécanismes de prévention.
 
-# 2. Architectural Vision
+Contrairement aux IDS traditionnels, SentinelX AI possède son propre moteur de capture réseau et ne dépend d'aucune solution tierce comme Suricata.
 
-Unlike traditional IDS solutions, SentinelX AI is organized around intelligent cyber defense engines.
+L'objectif est de construire une plateforme entièrement autonome, évolutive, modulaire et extensible.
 
-The platform continuously observes, analyzes, decides, prevents and learns from cyber events.
+---
 
-The system is designed to support future integration of new Machine Learning models, prevention strategies and autonomous decision-making capabilities.
+# 2. Objectifs
 
+Les objectifs principaux sont :
 
+- Capturer le trafic réseau en temps réel
+- Décoder les protocoles réseau
+- Construire les flux de communication
+- Extraire les caractéristiques utiles
+- Détecter les comportements malveillants
+- Détecter les attaques Zero-Day
+- Évaluer le niveau de risque
+- Décider automatiquement des actions
+- Exécuter des mécanismes de prévention
+- Apprendre continuellement de nouveaux comportements
 
-# 3. Architectural Principles
+---
 
-The architecture follows these principles:
+# 3. Principes d'Architecture
 
-- Separation of Concerns
-- Dependency Inversion
-- Single Responsibility
-- High Cohesion
-- Low Coupling
-- Testability
-- Extensibility
-- Security by Design
+SentinelX AI est construit selon les principes suivants.
 
+## Domain Driven Design (DDD)
 
+Toute la logique métier est indépendante des bibliothèques externes.
 
-# 4. Global Architecture
+Le domaine représente le cœur du système.
+
+---
+
+## Clean Architecture
+
+Les dépendances pointent toujours vers le domaine.
+
+Infrastructure → Application → Domaine
+
+Jamais l'inverse.
+
+---
+
+## Single Responsibility Principle
+
+Chaque module possède une seule responsabilité.
+
+---
+
+## Open / Closed Principle
+
+Le système doit pouvoir être étendu sans modifier les composants existants.
+
+---
+
+## Modularité
+
+Chaque moteur est indépendant.
+
+---
+
+## Testabilité
+
+Tous les composants doivent être testables indépendamment.
+
+---
+
+# 4. Architecture Générale
 
 ```
-                Web Dashboard
-                      │
-                      ▼
-               REST API (FastAPI)
-                      │
-                      ▼
-            Application Layer
-                      │
-                      ▼
-               Domain Layer
-                      │
-                      ▼
-          Infrastructure Layer
-                      │
-        ┌─────────────┴─────────────┐
-        ▼                           ▼
- PostgreSQL                  Network Collector
-                              (Scapy/Suricata)
+                        Utilisateur
+                               │
+                               ▼
+                    Dashboard Web
+                               │
+                               ▼
+                           REST API
+                               │
+                               ▼
+                    Application Services
+                               │
+                               ▼
+                    Core Detection Platform
+                               │
+        ┌──────────────┬───────────────┬───────────────┐
+        ▼              ▼               ▼
+ Capture Engine   Processing Engine  Detection Engine
+        │              │               │
+        └──────────────┴───────────────┘
+                       │
+                       ▼
+               Decision Platform
+                       │
+                       ▼
+               Prevention Platform
+                       │
+                       ▼
+               Learning Platform
 ```
 
-The Domain Layer is the heart of the platform.
+---
 
-No external framework may contain business logic.
+# 5. Architecture du Core
 
+Le Core est composé des moteurs suivants.
 
+## 5.1 Capture Engine
 
-# 5. Clean Architecture
+Responsabilités
 
-SentinelX AI is organized into four layers.
+- Capture réseau
+- Gestion des interfaces
+- Gestion des buffers
+- Capture temps réel
 
-## Presentation Layer
+Entrée
 
-Responsibilities:
+Interface réseau
 
-- REST API
-- Authentication
-- Dashboard communication
-- HTTP Requests
-- Response formatting
+Sortie
 
-Technologies:
+Paquets bruts
 
-- FastAPI
-- Pydantic
+---
 
+## 5.2 Packet Decoder
 
+Responsabilités
 
-## Application Layer
+- Ethernet
+- ARP
+- IPv4
+- IPv6
+- TCP
+- UDP
+- ICMP
 
-Responsibilities:
+Entrée
 
-- Application services
-- Use Cases
-- Command Handlers
-- Query Handlers
-- Orchestration
+Paquets bruts
 
-The Application Layer coordinates the business workflow.
+Sortie
 
+Packet Entity
 
+---
 
-## Domain Layer
+## 5.3 Flow Engine
 
-Responsibilities:
+Responsabilités
 
-- Business Rules
-- Entities
-- Value Objects
-- Domain Events
-- Repository Interfaces
-- Domain Services
+- Reconstruction des sessions
+- Identification des flux
+- Timeout
+- Statistiques
 
-This layer contains no dependency on:
+Sortie
 
-- FastAPI
-- PostgreSQL
-- SQLAlchemy
-- Machine Learning libraries
+Flow Entity
 
+---
 
+## 5.4 Feature Engine
 
-## Infrastructure Layer
+Responsabilités
 
-Responsibilities:
+Extraction des caractéristiques.
 
-- Database
-- ORM
-- File Storage
-- Machine Learning Models
-- Network Capture
-- External Services
+Exemples
 
+- durée
+- nombre de paquets
+- débit
+- taille moyenne
+- flags TCP
+- entropy
+- ratio entrant/sortant
 
+---
 
-# 6. Domain Model
+## 5.5 Detection Engine
 
-The Domain Layer contains the following business concepts:
+Responsabilités
 
-Entities
+Détection des cyberattaques.
 
-- Alert
-- Incident
-- Threat
-- PreventionAction
-- Decision
-- Knowledge
-- ModelVersion
-- NetworkFlow
+Modèles prévus
 
-Value Objects
+- Random Forest
+- Isolation Forest
+- One-Class SVM
+- AutoEncoder
+- Deep Learning
 
-- IPAddress
-- Port
-- RiskScore
-- ConfidenceScore
-- Timestamp
-- Protocol
+Sortie
 
-Repositories
+Threat Entity
 
-- AlertRepository
-- KnowledgeRepository
-- ThreatRepository
-- ModelRepository
+---
 
-Domain Services
+## 5.6 Knowledge Base
 
-- DetectionService
-- RiskAssessmentService
-- DecisionService
-- PreventionService
-- LearningService
+Responsabilités
 
+- enrichissement
+- contexte
+- recommandations
 
+---
 
-# 7. Cyber Defense Engines
+## 5.7 Risk Engine
 
-SentinelX AI is composed of five intelligent engines.
+Responsabilités
 
-## Detection Engine
+Calcul du Risk Score.
 
-Responsibilities:
+Sortie
 
-- Intrusion Detection
-- Attack Classification
+RiskAssessment
 
-Input
+---
 
-Network Features
+## 5.8 Decision Engine
 
-Output
+Responsabilités
 
-Threat Prediction
+Choisir automatiquement la meilleure réponse.
 
+---
 
+## 5.9 Prevention Engine
 
-## Risk Assessment Engine
+Responsabilités
 
-Responsibilities
+- blocage IP
+- blacklist
+- isolation machine
+- limitation de trafic
+- génération de règles
 
-- Threat Severity
-- Business Impact
-- Risk Score
+---
 
+## 5.10 Learning Engine
 
+Responsabilités
 
-## Decision Engine
+- apprentissage continu
+- mise à jour des modèles
+- validation
+- versionnement
 
-Responsibilities
+---
 
-- Policy Evaluation
-- Action Selection
-- Decision Validation
-
-
-
-## Prevention Engine
-
-Responsibilities
-
-- Block IP
-- Block Port
-- Quarantine Host
-- Firewall Update
-
-
-
-## Learning Engine
-
-Responsibilities
-
-- Continuous Learning
-- Knowledge Base Update
-- Model Retraining
-- Drift Detection
-
-
-
-# 8. Knowledge Base
-
-The Knowledge Base stores:
-
-- Historical attacks
-- Prevention strategies
-- Detection statistics
-- Security policies
-- Lessons learned
-- Model metadata
-
-Every engine can consult the Knowledge Base.
-
-Only the Learning Engine can update it.
-
-
-
-# 9. Event-Driven Communication
-
-The engines communicate using Domain Events.
-
-Examples:
-
-AttackDetected
-
-↓
-
-RiskCalculated
-
-↓
-
-DecisionTaken
-
-↓
-
-PreventionExecuted
-
-↓
-
-KnowledgeUpdated
-
-This approach reduces coupling between modules.
-
-
-
-# 10. Data Flow
+# 6. Architecture Applicative
 
 ```
-Packet
+Frontend
+
+Dashboard
+
+        │
+
+REST API
+
+        │
+
+Application Layer
+
+        │
+
+Domain Layer
+
+        │
+
+Infrastructure
+```
+
+---
+
+# 7. Dashboard
+
+Le Dashboard constitue le SOC de SentinelX AI.
+
+Fonctionnalités
+
+- tableau de bord
+- trafic temps réel
+- incidents
+- alertes
+- chronologie
+- recherche
+- statistiques
+- cartes
+- administration
+- configuration
+- utilisateurs
+- rapports
+- monitoring
+
+---
+
+# 8. Site Web
+
+Le site institutionnel est indépendant du Dashboard.
+
+Pages prévues
+
+Accueil
+
+Fonctionnalités
+
+Documentation
+
+Téléchargement
+
+Tarifs
+
+Blog
+
+Contact
+
+Support
+
+---
+
+# 9. API
+
+L'API constitue le point d'entrée de la plateforme.
+
+Fonctionnalités
+
+- REST
+- JWT
+- OAuth2
+- OpenAPI
+- Documentation Swagger
+
+---
+
+# 10. Base de Données
+
+SGBD
+
+PostgreSQL
+
+Tables principales
+
+users
+
+roles
+
+permissions
+
+packets
+
+flows
+
+alerts
+
+threats
+
+incidents
+
+risk_assessments
+
+knowledge
+
+ml_models
+
+system_logs
+
+audit_logs
+
+network_interfaces
+
+settings
+
+---
+
+# 11. Architecture Docker
+
+```
+Docker Compose
+
+┌──────────────────────┐
+│ sentinelx-core       │
+└──────────────────────┘
+
+┌──────────────────────┐
+│ sentinelx-api        │
+└──────────────────────┘
+
+┌──────────────────────┐
+│ sentinelx-dashboard  │
+└──────────────────────┘
+
+┌──────────────────────┐
+│ postgres             │
+└──────────────────────┘
+
+┌──────────────────────┐
+│ redis                │
+└──────────────────────┘
+```
+
+---
+
+# 12. Structure du Projet
+
+```
+src/
+
+sentinelx_ai/
+
+domain/
+
+application/
+
+capture_engine/
+
+packet_decoder/
+
+flow_engine/
+
+feature_engine/
+
+detection_engine/
+
+risk_engine/
+
+decision_engine/
+
+prevention_engine/
+
+learning_engine/
+
+api/
+
+dashboard/
+```
+
+---
+
+# 13. Flux de Données
+
+```
+Carte réseau
 
 ↓
 
-Collector
+Capture Engine
 
 ↓
 
-Feature Extraction
+Packet Decoder
 
 ↓
 
-Detection
+Flow Engine
 
 ↓
 
-Risk Assessment
+Feature Engine
 
 ↓
 
-Decision
-
-↓
-
-Prevention
-
-↓
-
-Learning
+Detection Engine
 
 ↓
 
@@ -326,72 +493,134 @@ Knowledge Base
 
 ↓
 
+Risk Engine
+
+↓
+
+Decision Engine
+
+↓
+
+Prevention Engine
+
+↓
+
+Learning Engine
+
+↓
+
 Dashboard
+
+↓
+
+Utilisateur
 ```
 
+---
 
+# 14. Sécurité
 
-# 11. Directory Structure
+Authentification
 
-```
-src/
-└── sentinelx_ai/
-    ├── application/
-    ├── domain/
-    ├── infrastructure/
-    ├── presentation/
-    └── shared/
-```
+JWT
 
+RBAC
 
+Journalisation
 
-# 12. Design Patterns
+Audit
 
-SentinelX AI uses:
+HTTPS
 
-- Repository Pattern
-- Factory Pattern
-- Strategy Pattern
-- Observer Pattern
-- Dependency Injection
-- Command Pattern
+Hash des mots de passe
 
+Chiffrement des secrets
 
+---
 
-# 13. Scalability
+# 15. Qualité Logicielle
 
-The architecture supports future integration of:
+Pytest
 
-- Multiple ML models
-- Cloud deployment
-- Distributed sensors
-- Multi-agent systems
-- Explainable AI
-- SIEM integration
+Ruff
 
+GitHub Actions
 
+Pre-commit
 
-# 14. Architectural Benefits
+Tests unitaires
 
-- High maintainability
-- Easy testing
-- Clear separation of concerns
-- Technology independence
-- Scalable design
-- Future-proof architecture
+Tests d'intégration
 
+Documentation
 
+---
 
-# 15. Conclusion
+# 16. Déploiement
 
-The architecture of SentinelX AI is designed to provide a robust foundation for an intelligent cyber defense platform.
+Développement
 
-By combining Clean Architecture, Domain-Driven Design and Event-Driven communication, the platform remains modular, maintainable and extensible while supporting advanced Machine Learning capabilities.
+Docker Compose
 
+Production
 
+Docker
 
-Document Version: 1.0
+Reverse Proxy
 
-Status: Approved
+HTTPS
 
-Last Update: July 2026
+CI/CD
+
+---
+
+# 17. Évolutions Futures
+
+Version 2
+
+- Cluster
+- Agents distribués
+- Haute disponibilité
+
+Version 3
+
+- IA Générative
+- Threat Intelligence
+- Réponse autonome
+
+Version 4
+
+- Multi-tenant
+- Cloud Native
+- Kubernetes
+- Federation
+
+---
+
+# 18. Règles d'Or du Projet
+
+Aucun moteur ne doit dépendre directement d'un autre.
+
+Toutes les communications passent par des interfaces.
+
+Aucune logique métier dans l'infrastructure.
+
+Toutes les fonctionnalités doivent être testées.
+
+Chaque Sprint suit le cycle :
+
+Développement
+
+Tests
+
+Pytest
+
+Ruff
+
+Commit
+
+Push
+
+Une seule responsabilité par module.
+
+L'architecture ne sera modifiée qu'après validation technique.
