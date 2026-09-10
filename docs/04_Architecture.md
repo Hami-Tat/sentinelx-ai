@@ -219,6 +219,44 @@ Threat Entity
 
 ---
 
+## 5.5.1 Calibration et Agrégation des Scores de Confiance
+
+Problème
+
+Les modèles prévus ne produisent pas des sorties comparables. Random Forest et Deep Learning (supervisés) sortent une probabilité par classe (`predict_proba` / softmax) sur [0,1], mais pas nécessairement bien calibrée. Isolation Forest et One-Class SVM (anomalie) sortent un score d'anomalie ou une distance à la frontière de décision. AutoEncoder sort une erreur de reconstruction. Aucune de ces trois échelles n'est une probabilité au sens statistique.
+
+Comparer ces sorties brutes entre elles pour choisir "la confiance la plus élevée" n'a pas de sens : un score d'anomalie élevé n'indique pas la même chose qu'une probabilité de classe élevée. Cette confusion se propagerait jusqu'au Risk Engine (5.7), puisque `Threat.confidence` alimente directement le `RiskScore`.
+
+Étape 1 — Calibration par détecteur
+
+Chaque `Detector` doit produire une confiance calibrée dans `DetectionResult` (interprétable comme "probabilité que la prédiction soit correcte"), jamais sa sortie brute.
+
+- Détecteurs supervisés (Random Forest, Deep Learning) : calibration Platt scaling ou isotonic regression sur les probabilités brutes, validée par reliability diagram / Brier score sur le jeu de validation.
+- Détecteurs d'anomalie (Isolation Forest, One-Class SVM) : transformation sigmoïde du score d'anomalie, ajustée sur la distribution des scores observée sur le jeu de validation (trafic normal vs attaques connues).
+- AutoEncoder : transformation de l'erreur de reconstruction via une sigmoïde centrée sur un seuil de reconstruction appris (`confidence = sigmoid(k * (erreur - seuil))`).
+
+Les paramètres de calibration (seuils, coefficients) sont propres à chaque version de modèle. Ils sont ré-entraînés et revalidés à chaque cycle du Learning Engine (5.10), en même temps que le modèle qu'ils calibrent.
+
+Étape 2 — Agrégation pondérée
+
+`EnsembleManager` n'effectue pas une simple sélection de la confiance maximale. Il agrège les résultats calibrés selon deux rôles distincts :
+
+- Les détecteurs supervisés identifient un `ThreatType` précis avec leur confiance calibrée.
+- Les détecteurs d'anomalie ne connaissent pas de catégorie précise : ils ne font que signaler un comportement anormal. Leur rôle est de corroborer (ou contredire) le type proposé par les détecteurs supervisés, et de capter les attaques Zero-Day que le supervisé n'a jamais vues à l'entraînement.
+
+Règle d'agrégation :
+
+1. Poids par détecteur = `MLModel.accuracy` (déjà présent dans l'entité domaine), normalisé entre les seuls détecteurs disponibles (`is_available() == True`) ; les détecteurs indisponibles sont exclus et leur poids redistribué.
+2. Pour un `ThreatType` proposé par un ou plusieurs détecteurs supervisés, la confiance finale est la moyenne pondérée de leurs confidences calibrées, renforcée (pondération additive bornée) par tout signal de corroboration provenant des détecteurs d'anomalie.
+3. Si aucun détecteur supervisé ne propose de type mais qu'un ou plusieurs détecteurs d'anomalie signalent une anomalie forte, le résultat est classé `ThreatType.ZERO_DAY` avec la confiance d'anomalie pondérée.
+4. Un seuil de décision configurable s'applique avant transmission au Risk Engine. En dessous de ce seuil, le résultat est classé `ThreatType.UNKNOWN` et escaladé pour revue humaine plutôt que transmis automatiquement au Decision Engine.
+
+Sortie
+
+`DetectionResult` agrégé (confiance calibrée et pondérée), prêt à alimenter le Risk Engine (5.7).
+
+---
+
 ## 5.6 Knowledge Base
 
 Responsabilités

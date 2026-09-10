@@ -26,18 +26,18 @@ SentinelX AI aims to evolve from an **AI-powered Intrusion Detection System (IDS
 | Sprint | Module | Status |
 | :----- | :--------------------------- | :---: |
 | Sprint 0 | Project Setup | Completed |
-| Sprint 1 | Domain Layer |  Planned |
-| Sprint 2 | Knowledge Base |  Planned |
-| Sprint 3 | Network Collector |  Planned |
-| Sprint 4 | Feature Extraction |  Planned |
-| Sprint 5 | ML Detection Engine |  Planned |
-| Sprint 6 | Risk Assessment Engine |  Planned |
-| Sprint 7 | Decision Engine |  Planned |
-| Sprint 8 | Prevention Engine |  Planned |
-| Sprint 9 | Learning Engine |  Planned |
-| Sprint 10 | REST API |  Planned |
-| Sprint 11 | Web Dashboard |  Planned |
-| Sprint 12 | Testing & Deployment |  Planned |
+| Sprint 1 | Domain Layer | Completed |
+| Sprint 2 | Knowledge Base | Completed |
+| Sprint 3 | Network Collector | Completed (basic — tested skeleton, real scapy-based capture still to be deepened) |
+| Sprint 4 | Feature Extraction | Completed (basic — extraction still simplified) |
+| Sprint 5 | ML Detection Engine | In Progress |
+| Sprint 6 | Risk Assessment Engine | Planned |
+| Sprint 7 | Decision Engine | Planned |
+| Sprint 8 | Prevention Engine | Planned |
+| Sprint 9 | Learning Engine | Planned |
+| Sprint 10 | REST API | Planned |
+| Sprint 11 | Web Dashboard | Planned |
+| Sprint 12 | Testing & Deployment | Planned |
 
 ---
 
@@ -89,12 +89,12 @@ Future versions may include:
 # Current Progress
 
 ```text
-██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 25%
+██████████████░░░░░░░░░░░░░░░░░░░░░░░░ 35%
 
 Documentation      ██████████ 100%
 Architecture       ██████████ 100%
-Development        ░░░░░░░░░░   0%
-Testing            ░░░░░░░░░░   0%
+Development        ████░░░░░░  40%
+Testing            ███░░░░░░░  30%
 Deployment         ░░░░░░░░░░   0%
 ```
 
@@ -102,9 +102,9 @@ Deployment         ░░░░░░░░░░   0%
 
 # Next Step
 
-➡️ **Sprint 1 — Build the Domain Layer**
+➡️ **Sprint 5 — Finish the ML Detection Engine**
 
-The next milestone is to implement the business core of SentinelX AI following **Clean Architecture** and **Domain-Driven Design (DDD)**.
+The next milestone is to complete the Detection Engine (detector implementations, detection service orchestration, and test coverage) before moving on to the Risk Assessment Engine.
 
 ---
 
@@ -114,4 +114,4 @@ The next milestone is to implement the business core of SentinelX AI following *
 | :--- | :---- |
 | Version | 1.0 |
 | Status | Approved |
-| Last Update | July 2026 |
+| Last Update | September 10, 2026 |
