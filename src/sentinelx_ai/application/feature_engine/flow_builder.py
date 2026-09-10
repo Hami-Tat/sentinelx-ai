@@ -7,16 +7,17 @@ Responsible for grouping packets into network flows.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+
+from sentinelx_ai.domain.entities.packet import Packet
 
 
 @dataclass(slots=True)
 class NetworkFlow:
     """Represents a network flow."""
 
-    packets: list[Any] = field(default_factory=list)
+    packets: list[Packet] = field(default_factory=list)
 
-    def add_packet(self, packet: Any) -> None:
+    def add_packet(self, packet: Packet) -> None:
         """Add a packet to the flow."""
         self.packets.append(packet)
 
@@ -27,12 +28,19 @@ class NetworkFlow:
 
 
 class FlowBuilder:
-    """Build network flows from captured packets."""
+    """
+    Build network flows from captured packets.
+
+    Current limitation: this first implementation groups packets into
+    fixed batches of five, with no notion of connection (no 5-tuple
+    matching) and no timeout-based flow expiration. It is not the
+    final flow-reconstruction logic.
+    """
 
     def __init__(self) -> None:
         self._current_flow = NetworkFlow()
 
-    def add_packet(self, packet: Any) -> NetworkFlow | None:
+    def add_packet(self, packet: Packet) -> NetworkFlow | None:
         """
         Add a packet to the current flow.
 

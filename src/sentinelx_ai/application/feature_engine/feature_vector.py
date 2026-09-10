@@ -32,7 +32,7 @@ class FeatureVector:
         Returns:
             A FeatureVector instance.
         """
-        total_bytes = sum(len(str(packet)) for packet in flow.packets)
+        total_bytes = sum(packet.size for packet in flow.packets)
 
         return cls(
             packet_count=flow.packet_count,
